@@ -22,7 +22,8 @@ function App() {
           onInput={(e) => handleParse(e.target.value)}
         ></textarea>
         <button
-          class="mt-2 bg-blue-500 text-white py-2 px-4 rounded-md"
+          class="mt-2 bg-blue-500 text-white py-2 px-4 rounded-md
+          hover:bg-blue-600 active:bg-blue-700 transition-colors duration-100 cursor-pointer"
           // onClick={handleParse}
         >
           Parse Tabs
