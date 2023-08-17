@@ -1,5 +1,7 @@
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { Notation } from "./parsers";
+import { fabric } from "fabric";
+import { createCanvas } from "./createCanvas";
 
 interface TabsCanvasProps {
   parsedTabs: Notation[];
@@ -10,63 +12,73 @@ interface TabsCanvasProps {
   dashWidth: number;
 }
 
+const fontSize = 16;
+
 function TabsCanvas(props: TabsCanvasProps) {
-  const [context, setCtx] = createSignal<
-    CanvasRenderingContext2D | undefined
-  >();
+  const [canvas, setCanvas] = createSignal<fabric.Canvas | undefined>();
 
-  let canvas: HTMLCanvasElement | undefined = undefined;
-
+  let cvs: HTMLCanvasElement | undefined = undefined;
   onMount(() => {
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d")!;
-    setCtx(ctx);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "16px monospace";
-    ctx.fillStyle = "black";
-
+    setCanvas(createCanvas(cvs));
     onCleanup(() => {
-      canvas && ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas()?.clear();
     });
   });
 
   createEffect(() => {
-    const ctx = context();
-    if (!ctx || !canvas) return;
+    if (!canvas()) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const drawTabs = (canvas: fabric.Canvas) => {
+      canvas.clear();
 
-    const drawDash = (x: number, y: number, length: number) => {
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + length, y);
-      ctx.stroke();
-      return x + length;
+      const drawDash = (x: number, y: number, length: number) => {
+        const dash = new fabric.Line([x, y, x + length, y], {
+          stroke: "black",
+          strokeWidth: 1,
+        });
+        canvas.add(dash);
+        return x + length;
+      };
+
+      const drawNote = (x: number, y: number, note: number) => {
+        const nt = new fabric.Text(note.toString(), {
+          left: x,
+          fontSize,
+          top: y / 2,
+        });
+
+        canvas.add(nt);
+        return x + note.toString().length * fontSize;
+      };
+
+      const draw = (notation: Notation, x: number, y: number) => {
+        if (notation.type === "dash" && notation.value !== undefined) {
+          return drawDash(
+            x,
+            (y + fontSize) / 2,
+            notation.value * props.dashWidth
+          );
+        } else if (notation.type === "note" && notation.value !== undefined) {
+          return drawNote(x, y, notation.value);
+        }
+        return 0;
+      };
+      props.parsedTabs?.reduce((x, notation) => {
+        const y = props.lineHeight;
+        return draw(notation, x, y);
+      }, 0);
     };
 
-    const drawNote = (x: number, y: number, note: number) => {
-      ctx.fillText(note.toString(), x, y);
-      return x + 16;
-    };
-
-    const draw = (notation: Notation, x: number, y: number) => {
-      if (notation.type === "dash" && notation.value !== undefined) {
-        return drawDash(x, (y + 16) / 2, notation.value * props.dashWidth);
-      } else if (notation.type === "note" && notation.value !== undefined) {
-        return drawNote(x, y, notation.value);
-      }
-      return 0;
-    };
-
-    props.parsedTabs.reduce((x, notation) => {
-      const y = props.lineHeight;
-      return draw(notation, x, y);
-    }, 0);
+    drawTabs(canvas()!);
   });
 
   return (
-    <canvas ref={canvas} width={props.width} height={props.height}></canvas>
+    <canvas
+      ref={cvs}
+      id="canvas"
+      width={props.width}
+      height={props.height}
+    ></canvas>
   );
 }
 
