@@ -1,26 +1,24 @@
-import { For, createEffect } from "solid-js";
-import { StaffLine } from "./StaffLine";
-import { Notation } from "./parsers";
+import { For, createEffect, onMount } from 'solid-js';
+import { StaffLine } from './StaffLine';
+import { Notation, Note } from './parsers';
+import { useCanvas } from './createCanvas';
+import { Rect } from 'fabric';
 
-export const Staff = ({
-  linesNum,
-  notation,
-}: {
-  linesNum: number;
-  notation: Notation[][];
-}) => {
+export const Staff = (props: { linesNum: number; notation: Note[][] }) => {
   createEffect(() => {
-    console.log("notation", notation);
+    console.log('notation', props.notation);
   });
 
+  onMount(() => {});
+
   return (
-    <For each={Array(linesNum)}>
+    <For each={Array(props.linesNum)}>
       {(_, i) => (
         <StaffLine
           spacing={25}
           width={500}
-          num={i()}
-          notation={notation[i()] ?? []}
+          num={i() + 1}
+          notes={props.notation[i()] ?? []}
         />
       )}
     </For>

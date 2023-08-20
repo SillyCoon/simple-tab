@@ -1,7 +1,7 @@
-import { List } from "immutable";
+import { List } from 'immutable';
 
 export interface Notation {
-  type: "dash" | "note";
+  type: 'dash' | 'note';
   value?: number;
 }
 
@@ -13,28 +13,28 @@ export interface Note {
 export const tabParser = (tabs: string): Notation[][] => {
   const tabLines = tabs
     .trim()
-    .split("\n")
-    .map((line) => List(line.split("")));
+    .split('\n')
+    .map((line) => List(line.split('')));
 
   const process = (
     symbols: List<string>,
-    notation: List<Notation>
+    notation: List<Notation>,
   ): List<Notation> => {
     if (symbols.isEmpty()) return notation.reverse();
-    if (symbols.last() === "-") {
+    if (symbols.last() === '-') {
       return process(
         symbols.butLast(),
-        notation.last()?.type === "dash"
+        notation.last()?.type === 'dash'
           ? notation.update(-1, (v: Notation | undefined) => ({
-              type: "dash",
+              type: 'dash',
               value: (v?.value ?? 0) + 1,
             }))
-          : notation.push({ type: "dash", value: 1 })
+          : notation.push({ type: 'dash', value: 1 }),
       );
     } else {
       return process(
         symbols.butLast(),
-        notation.push({ type: "note", value: +(symbols.last() ?? 0) })
+        notation.push({ type: 'note', value: +(symbols.last() ?? 0) }),
       );
     }
   };
@@ -46,7 +46,7 @@ export const notationToNotes = (notation: List<Notation>): Note[] => {
   const rec = (notes: List<Note>, notation: List<Notation>): List<Note> => {
     if (notation.isEmpty()) return notes;
     const n = notation.first();
-    if (n?.type === "dash") {
+    if (n?.type === 'dash') {
       const note = notation.skip(1).first();
       if (!note) return notes;
       const lastNote = notes.last();
@@ -55,7 +55,7 @@ export const notationToNotes = (notation: List<Notation>): Note[] => {
           offset: (lastNote ? lastNote.offset + 1 : 0) + (n?.value ?? 0),
           value: note.value ?? 0,
         }),
-        notation.skip(2)
+        notation.skip(2),
       );
     } else {
       return rec(
@@ -63,7 +63,7 @@ export const notationToNotes = (notation: List<Notation>): Note[] => {
           offset: (notes.last()?.offset ?? 0) + 1,
           value: n?.value ?? 0,
         }),
-        notation.skip(1)
+        notation.skip(1),
       );
     }
   };

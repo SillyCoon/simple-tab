@@ -4,14 +4,14 @@ import {
   onCleanup,
   onMount,
   useContext,
-} from "solid-js";
-import { Notation } from "./parsers";
-import { Text, Line, Canvas } from "fabric";
-import { createCanvas, useCanvas } from "./createCanvas";
-import { Staff } from "./Staff";
+} from 'solid-js';
+import { Notation, Note } from './parsers';
+import { Text, Line, Canvas, Rect } from 'fabric';
+import { createCanvas, useCanvas } from './createCanvas';
+import { Staff } from './Staff';
 
 interface TabsCanvasProps {
-  parsedTabs: Notation[];
+  parsedTabs: Note[][];
   columnWidth: number;
   lineHeight: number;
   dashWidth: number;
@@ -33,7 +33,7 @@ function makeMusicStaff(width: number, spacing: number) {
   for (let i = 0; i < numLines; i++) {
     const y = i * spacing;
     const line = new Line([0, y, width, y], {
-      stroke: "black",
+      stroke: 'black',
       opacity: 0.5,
       strokeWidth: 1,
     });
@@ -46,56 +46,68 @@ function TabsCanvas(props: TabsCanvasProps) {
   onMount(() => {
     createCanvas(htmlCanvas!);
     onCleanup(() => {
-      useCanvas?.()?.clear();
+      // useCanvas?.()?.clear();
     });
+
+    const canvas = useCanvas();
+
+    if (!canvas) return;
+
+    const box = new Rect({
+      left: 0,
+      top: 0,
+      width: canvas?.width - 1,
+      height: canvas?.height - 1,
+      strokeWidth: 1,
+      stroke: 'red',
+      fill: null,
+    });
+
+    canvas?.add(box);
   });
 
   createEffect(() => {
-    const drawTabs = (canvas: Canvas) => {
-      const drawDash = (x: number, y: number, length: number) => {
-        const dash = new Line([x, y, x + length, y], {
-          stroke: "black",
-          strokeWidth: 1,
-        });
-        canvas.add(dash);
-        return x + length;
-      };
-
-      const drawNote = (x: number, y: number, note: number) => {
-        const nt = new Text(note.toString(), {
-          left: x,
-          fontSize,
-          top: y / 2,
-        });
-
-        canvas.add(nt);
-        return x + note.toString().length * fontSize;
-      };
-
-      const draw = (notation: Notation, x: number, y: number) => {
-        if (notation.type === "dash" && notation.value !== undefined) {
-          return drawDash(
-            x,
-            (y + fontSize) / 2,
-            notation.value * props.dashWidth
-          );
-        } else if (notation.type === "note" && notation.value !== undefined) {
-          return drawNote(x, y, notation.value);
-        }
-        return 0;
-      };
-      props.parsedTabs?.reduce((x, notation) => {
-        const y = props.lineHeight;
-        return draw(notation, x, y);
-      }, 0);
-    };
-
+    // const drawTabs = (canvas: Canvas) => {
+    //   const drawDash = (x: number, y: number, length: number) => {
+    //     const dash = new Line([x, y, x + length, y], {
+    //       stroke: 'black',
+    //       strokeWidth: 1,
+    //     });
+    //     canvas.add(dash);
+    //     return x + length;
+    //   };
+    //   const drawNote = (x: number, y: number, note: number) => {
+    //     const nt = new Text(note.toString(), {
+    //       left: x,
+    //       fontSize,
+    //       top: y / 2,
+    //     });
+    //     canvas.add(nt);
+    //     return x + note.toString().length * fontSize;
+    //   };
+    //   const draw = (notation: Notation, x: number, y: number) => {
+    //     if (notation.type === 'dash' && notation.value !== undefined) {
+    //       return drawDash(
+    //         x,
+    //         (y + fontSize) / 2,
+    //         notation.value * props.dashWidth,
+    //       );
+    //     } else if (notation.type === 'note' && notation.value !== undefined) {
+    //       return drawNote(x, y, notation.value);
+    //     }
+    //     return 0;
+    //   };
+    //   props.parsedTabs?.reduce((x, notation) => {
+    //     const y = props.lineHeight;
+    //     return draw(notation, x, y);
+    //   }, 0);
+    // };
     // drawTabs(canvas()!);
   });
 
   return (
     <>
-      <Staff linesNum={6} notation={[props.parsedTabs]}></Staff>
+      <Staff linesNum={6} notation={props.parsedTabs}></Staff>
       <canvas
         ref={htmlCanvas}
         width={props.width}

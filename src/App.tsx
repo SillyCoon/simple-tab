@@ -1,13 +1,14 @@
-import { createEffect, createSignal } from "solid-js";
-import { Notation, tabParser } from "./parsers/";
-import TabsCanvas from "./TabsCanvas";
+import { createEffect, createSignal } from 'solid-js';
+import { Notation, Note, notationToNotes, tabParser } from './parsers/';
+import TabsCanvas from './TabsCanvas';
+import { List } from 'immutable';
 
 function App() {
-  const [tabsInput, setTabsInput] = createSignal("");
-  const [parsedTabs, setParsedTabs] = createSignal<Notation[][]>([]);
+  const [tabsInput, setTabsInput] = createSignal('');
+  const [parsedTabs, setParsedTabs] = createSignal<Note[][]>([]);
 
   const handleParse = (str: string) => {
-    const parsedData = tabParser(str);
+    const parsedData = tabParser(str).map((v) => notationToNotes(List(v)));
     setParsedTabs(parsedData);
   };
 
@@ -30,9 +31,9 @@ function App() {
         </button>
         <div class="mt-4">
           <TabsCanvas
-            parsedTabs={parsedTabs()[0]}
+            parsedTabs={parsedTabs()}
             width={800}
-            height={150}
+            height={300}
             columnWidth={10}
             lineHeight={30}
             dashWidth={10}
