@@ -1,38 +1,59 @@
-import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  onCleanup,
+  onMount,
+  useContext,
+} from "solid-js";
 import { Notation } from "./parsers";
-import { fabric } from "fabric";
-import { createCanvas } from "./createCanvas";
+import { Text, Line, Canvas } from "fabric";
+import { createCanvas, useCanvas } from "./createCanvas";
+import { Staff } from "./Staff";
 
 interface TabsCanvasProps {
   parsedTabs: Notation[];
-  width: number;
-  height: number;
   columnWidth: number;
   lineHeight: number;
   dashWidth: number;
+  width: number;
+  height: number;
 }
 
 const fontSize = 16;
 
-function TabsCanvas(props: TabsCanvasProps) {
-  const [canvas, setCanvas] = createSignal<fabric.Canvas | undefined>();
+const makeNote = (note: number) => {
+  return new Text(note.toString(), { fontSize });
+};
 
-  let cvs: HTMLCanvasElement | undefined = undefined;
+type Staff = Line[];
+
+function makeMusicStaff(width: number, spacing: number) {
+  const numLines = 6; // Number of lines in a music staff
+
+  for (let i = 0; i < numLines; i++) {
+    const y = i * spacing;
+    const line = new Line([0, y, width, y], {
+      stroke: "black",
+      opacity: 0.5,
+      strokeWidth: 1,
+    });
+  }
+}
+
+function TabsCanvas(props: TabsCanvasProps) {
+  let htmlCanvas: HTMLCanvasElement | undefined;
+
   onMount(() => {
-    setCanvas(createCanvas(cvs));
+    createCanvas(htmlCanvas!);
     onCleanup(() => {
-      canvas()?.clear();
+      useCanvas?.()?.clear();
     });
   });
 
   createEffect(() => {
-    if (!canvas()) return;
-
-    const drawTabs = (canvas: fabric.Canvas) => {
-      canvas.clear();
-
+    const drawTabs = (canvas: Canvas) => {
       const drawDash = (x: number, y: number, length: number) => {
-        const dash = new fabric.Line([x, y, x + length, y], {
+        const dash = new Line([x, y, x + length, y], {
           stroke: "black",
           strokeWidth: 1,
         });
@@ -41,7 +62,7 @@ function TabsCanvas(props: TabsCanvasProps) {
       };
 
       const drawNote = (x: number, y: number, note: number) => {
-        const nt = new fabric.Text(note.toString(), {
+        const nt = new Text(note.toString(), {
           left: x,
           fontSize,
           top: y / 2,
@@ -69,16 +90,19 @@ function TabsCanvas(props: TabsCanvasProps) {
       }, 0);
     };
 
-    drawTabs(canvas()!);
+    // drawTabs(canvas()!);
   });
 
   return (
-    <canvas
-      ref={cvs}
-      id="canvas"
-      width={props.width}
-      height={props.height}
-    ></canvas>
+    <>
+      <Staff linesNum={6} notation={[props.parsedTabs]}></Staff>
+      <canvas
+        ref={htmlCanvas}
+        width={props.width}
+        height={props.height}
+        id="canvas"
+      ></canvas>
+    </>
   );
 }
 

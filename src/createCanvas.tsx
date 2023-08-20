@@ -1,8 +1,10 @@
-import { fabric } from "fabric";
-import { createMemo } from "solid-js";
+import { Canvas } from "fabric";
+import { createSignal } from "solid-js";
 
-export const createCanvas = (cvs?: HTMLCanvasElement) => {
-  console.log("createCanvas", cvs);
+const [canvas, setCanvas] = createSignal<Canvas>();
 
-  return cvs ? new fabric.Canvas(cvs) : undefined;
+export const createCanvas = (canvas: HTMLCanvasElement) => {
+  setCanvas(new Canvas(canvas));
 };
+
+export const useCanvas = canvas;
