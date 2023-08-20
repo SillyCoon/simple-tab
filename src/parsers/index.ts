@@ -10,11 +10,13 @@ export interface Note {
   offset: number;
 }
 
+const isValidSymbol = (s: string) => s === '-' || Number.isInteger(+s);
+
 export const tabParser = (tabs: string): Notation[][] => {
   const tabLines = tabs
     .trim()
     .split('\n')
-    .map((line) => List(line.split('')));
+    .map((line) => List(line.split('').filter(isValidSymbol)));
 
   const process = (
     symbols: List<string>,
