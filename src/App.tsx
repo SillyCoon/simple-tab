@@ -1,15 +1,14 @@
 import { createSignal } from "solid-js";
-import { Note, notationToNotes, tabParser } from "./parsers/";
+import { Note, tabParser } from "./parsers/";
 import TabsCanvas from "./TabsCanvas";
-import { List } from "immutable";
 
 function App() {
   const [tabsInput, setTabsInput] = createSignal("");
   const [parsedTabs, setParsedTabs] = createSignal<Note[][]>([]);
 
   const handleParse = (str: string) => {
-    const parsedData = tabParser(str).map((v) => notationToNotes(List(v)));
-    setParsedTabs(parsedData);
+    const notation = tabParser(str);
+    setParsedTabs(notation);
   };
 
   return (
