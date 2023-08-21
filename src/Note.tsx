@@ -1,6 +1,6 @@
-import { onCleanup, onMount } from "solid-js";
-import { useCanvas } from "./createCanvas";
-import { Text, Rect } from "fabric";
+import { onCleanup, onMount } from 'solid-js';
+import { useCanvas } from './createCanvas';
+import { Text, Rect } from 'fabric';
 
 export const Note = (props: { value: number; line: number; place: number }) => {
   const fontSize = 16;
@@ -11,6 +11,9 @@ export const Note = (props: { value: number; line: number; place: number }) => {
 
     const note = new Text(props.value.toString(), {
       fontSize,
+    });
+
+    note.set({
       left: props.place,
       top: props.line,
     });
@@ -20,7 +23,7 @@ export const Note = (props: { value: number; line: number; place: number }) => {
       top: props.line,
       width: note.width + 2,
       height: note.height + 2,
-      fill: "white",
+      fill: 'white',
     });
 
     canvas.add(noteBox);
