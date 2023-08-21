@@ -33,8 +33,9 @@ function TabsCanvas(props: TabsCanvasProps) {
       top: 0,
       width: canvas?.width - 1,
       height: canvas?.height - 1,
+      stroke: "black",
+      opacity: 0.5,
       strokeWidth: 1,
-      stroke: "red",
       fill: null,
     });
 
