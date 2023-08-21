@@ -1,3 +1,5 @@
+[![Deploy static content to Pages](https://github.com/SillyCoon/simple-tab/actions/workflows/deploy.yml/badge.svg)](https://github.com/SillyCoon/simple-tab/actions/workflows/deploy.yml)
+
 ## Usage
 
 Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
