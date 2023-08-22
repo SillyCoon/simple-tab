@@ -39,7 +39,7 @@ function TabsCanvas(props: TabsCanvasProps) {
       fill: null,
     });
 
-    canvas?.add(box);
+    canvas.add(box);
   });
 
   return (

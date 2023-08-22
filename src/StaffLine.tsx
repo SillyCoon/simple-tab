@@ -1,8 +1,9 @@
-import { For, onCleanup, onMount } from 'solid-js';
-import { useCanvas } from './createCanvas';
-import { Line } from 'fabric';
-import { Note as NoteType } from './parsers';
-import { Note } from './Note';
+import { For, onCleanup, onMount } from "solid-js";
+import { useCanvas } from "./createCanvas";
+import { Line } from "fabric";
+import { Note as NoteType } from "./parsers";
+import { Note } from "./Note";
+import config from "../config/tabs-config.json";
 
 interface StaffLineProps {
   width: number;
@@ -11,29 +12,28 @@ interface StaffLineProps {
   notes: NoteType[];
 }
 
-const initialOffset = 30;
-
-const notePlace = (
-  lineNum: number,
-  lineGap: number,
-  fontSize: number,
-  lineWidth: number,
+const notePosition = (
+  dashes: number,
+  notesOffset: number,
+  initialOffset: number
 ) => {
-  return lineNum * lineGap - (fontSize / 2 + lineWidth * 2);
+  return dashes * notesOffset + initialOffset;
 };
 
 export const StaffLine = (props: StaffLineProps) => {
+  const y = props.num * props.spacing;
+
   onMount(() => {
     const canvas = useCanvas();
-    const y = props.num * props.spacing;
+    if (!canvas) return;
 
     const line = new Line([0, y, props.width, y], {
-      stroke: 'black',
+      stroke: "black",
       opacity: 0.5,
       strokeWidth: 1,
     });
 
-    canvas?.add(line);
+    canvas.add(line);
 
     onCleanup(() => {
       line && useCanvas()?.remove(line);
@@ -47,8 +47,12 @@ export const StaffLine = (props: StaffLineProps) => {
           return (
             <Note
               value={note.value}
-              line={notePlace(props.num, props.spacing, 16, 1)}
-              place={note.offset * 20 + initialOffset}
+              line={y}
+              position={notePosition(
+                note.offset,
+                config.notesOffset,
+                config.initialOffset
+              )}
             ></Note>
           );
         }}

@@ -1,37 +1,49 @@
-import { onCleanup, onMount } from 'solid-js';
-import { useCanvas } from './createCanvas';
-import { Text, Rect } from 'fabric';
+import { onCleanup, onMount } from "solid-js";
+import { useCanvas } from "./createCanvas";
+import { Text, Rect, Group } from "fabric";
+import config from "../config/tabs-config.json";
 
-export const Note = (props: { value: number; line: number; place: number }) => {
-  const fontSize = 16;
+const makeBoxedNote = (val: string, fontSize: number) => {
+  const note = new Text(val, {
+    originY: "center",
+    originX: "center",
+    fontSize,
+  });
 
+  const noteBox = new Rect({
+    originX: "center",
+    originY: "center",
+    fill: "white",
+    width: note.getBoundingRect().width + 2,
+    height: note.getBoundingRect().height,
+  });
+
+  return new Group([noteBox, note], {
+    originY: "center",
+  });
+};
+
+export const Note = (props: {
+  value: number;
+  line: number;
+  position: number;
+}) => {
   onMount(() => {
     const canvas = useCanvas();
     if (!canvas) return;
 
-    const note = new Text(props.value.toString(), {
-      fontSize,
-    });
-
-    note.set({
-      left: props.place,
+    const boxedNote = makeBoxedNote(
+      props.value.toString(),
+      config.fontSize
+    ).set({
       top: props.line,
+      left: props.position,
     });
 
-    const noteBox = new Rect({
-      left: props.place - 1,
-      top: props.line,
-      width: note.width + 2,
-      height: note.height + 2,
-      fill: 'white',
-    });
-
-    canvas.add(noteBox);
-    canvas.add(note);
+    canvas.add(boxedNote);
 
     onCleanup(() => {
-      canvas.remove(note);
-      canvas.remove(noteBox);
+      canvas.remove(boxedNote);
     });
   });
 
