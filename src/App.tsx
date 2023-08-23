@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
 import { Note, tabParser } from "./parsers/";
 import TabsCanvas from "./TabsCanvas";
+import { Notifications } from "./components/Notifications";
 
 function App() {
   const [tabsInput, setTabsInput] = createSignal("");
@@ -37,6 +38,11 @@ function App() {
             lineHeight={30}
             dashWidth={10}
           ></TabsCanvas>
+        </div>
+        <div class="mt-4">
+          <Notifications
+            notifications={{ errors: [], warnings: [] }}
+          ></Notifications>
         </div>
       </div>
     </div>

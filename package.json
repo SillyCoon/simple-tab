@@ -14,6 +14,7 @@
     "fabric": "beta",
     "immutable": "^4.3.2",
     "jest-environment-jsdom": "^29.6.2",
+    "solid-icons": "^1.0.11",
     "solid-js": "^1.7.6"
   },
   "devDependencies": {
