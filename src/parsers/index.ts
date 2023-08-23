@@ -40,6 +40,14 @@ export const tabParser = (tabs: string): Note[][] =>
     .map((line) => List(line.split("").filter(isValidSymbol)))
     .map(notationToNotes);
 
+const cutNote = (note: string) => {
+  const maxNoteSize = 2;
+  if (note.length > maxNoteSize) {
+    return note.slice(0, 2);
+  }
+  return note;
+};
+
 export const notationToNotes = (notation: List<string>): Note[] => {
   const rec = (notes: List<Note>, notation: List<string>): List<Note> => {
     if (notation.isEmpty()) return notes;
@@ -53,7 +61,9 @@ export const notationToNotes = (notation: List<string>): Note[] => {
     return rec(
       notes.push({
         offset: (prevNote?.offset ?? 0) + dashes,
-        value: +currentNote.reduce<string>((numA, numB) => numA + numB),
+        value: +cutNote(
+          currentNote.reduce<string>((numA, numB) => numA + numB)
+        ),
       }),
       notation.skip(dashes + currentNote.size)
     );
