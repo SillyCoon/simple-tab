@@ -28,6 +28,7 @@ const SpecialSymbols = ["-"];
 export interface Note {
   value: number;
   offset: number;
+  notesBefore: number;
 }
 
 const isValidSymbol = (s: string) =>
@@ -64,6 +65,7 @@ export const notationToNotes = (notation: List<string>): Note[] => {
         value: +cutNote(
           currentNote.reduce<string>((numA, numB) => numA + numB)
         ),
+        notesBefore: notes.size,
       }),
       notation.skip(dashes + currentNote.size)
     );

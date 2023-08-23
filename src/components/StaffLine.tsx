@@ -14,10 +14,11 @@ interface StaffLineProps {
 
 const notePosition = (
   dashes: number,
+  notesBefore: number,
   notesOffset: number,
   initialOffset: number
 ) => {
-  return dashes * notesOffset + initialOffset;
+  return initialOffset + dashes * notesOffset + notesBefore * notesOffset;
 };
 
 export const StaffLine = (props: StaffLineProps) => {
@@ -50,6 +51,7 @@ export const StaffLine = (props: StaffLineProps) => {
               line={y}
               position={notePosition(
                 note.offset,
+                note.notesBefore,
                 config.notesOffset,
                 config.initialOffset
               )}
