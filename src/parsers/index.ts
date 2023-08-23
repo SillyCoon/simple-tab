@@ -1,4 +1,10 @@
 import { List } from "immutable";
+import { ParsingError } from "../notifier/notifier";
+
+export type ParsingResult = {
+  notes: Note[];
+  errors: ParsingError[];
+};
 
 export interface Notation {
   type: "dash" | "note" | "hammer";
@@ -31,47 +37,58 @@ export interface Note {
   notesBefore: number;
 }
 
-const isValidSymbol = (s: string) =>
-  SpecialSymbols.includes(s) || Number.isInteger(+s);
-
-export const tabParser = (tabs: string): Note[][] =>
+export const tabParser = (tabs: string): ParsingResult[] =>
   tabs
     .trim()
     .split("\n")
     .map((line) => List(line.split("").filter(isValidSymbol)))
-    .map(notationToNotes);
+    .map(parseNotation);
 
-const cutNote = (note: string) => {
-  const maxNoteSize = 2;
-  if (note.length > maxNoteSize) {
-    return note.slice(0, 2);
-  }
-  return note;
-};
-
-export const notationToNotes = (notation: List<string>): Note[] => {
-  const rec = (notes: List<Note>, notation: List<string>): List<Note> => {
-    if (notation.isEmpty()) return notes;
+const parseNotation = (notation: List<string>): ParsingResult => {
+  const rec = (
+    notes: List<Note>,
+    notation: List<string>,
+    errors: ParsingError[]
+  ): Omit<ParsingResult, "notes"> & { notes: List<Note> } => {
+    if (notation.isEmpty()) return { notes, errors };
 
     const dashes = countWhileDashes(notation);
     const currentNote = takeNote(notation.skip(dashes));
 
-    if (!currentNote.size) return notes;
+    if (!currentNote.size) return { notes, errors };
 
     const prevNote = notes.last();
+    const [note, error] = cutNote(
+      currentNote.reduce<string>((numA, numB) => numA + numB)
+    );
+
     return rec(
       notes.push({
         offset: (prevNote?.offset ?? 0) + dashes,
-        value: +cutNote(
-          currentNote.reduce<string>((numA, numB) => numA + numB)
-        ),
+        value: +note,
         notesBefore: notes.size,
       }),
-      notation.skip(dashes + currentNote.size)
+      notation.skip(dashes + currentNote.size),
+      error ? [...errors, error] : errors
     );
   };
 
-  return rec(List(), notation).toArray();
+  const result = rec(List(), notation, []);
+  return { errors: result.errors, notes: result.notes.toArray() };
+};
+
+const isValidSymbol = (s: string) =>
+  SpecialSymbols.includes(s) || Number.isInteger(+s);
+
+const cutNote = (note: string): [string] | [string, ParsingError] => {
+  const maxNoteSize = 2;
+  if (note.length > maxNoteSize) {
+    return [
+      note.slice(0, 2),
+      { message: "Note is too long", value: note, type: "error" },
+    ];
+  }
+  return [note];
 };
 
 const countWhileDashes = (notation: List<string>): number =>

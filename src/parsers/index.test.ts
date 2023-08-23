@@ -1,5 +1,5 @@
 import { List } from "immutable";
-import { notationToNotes, tabParser } from ".";
+import { parseNotation, tabParser } from ".";
 
 describe("notation", () => {
   it("notationToNotes", () => {

@@ -1,17 +1,17 @@
 import { For } from "solid-js";
-import { Notifications as NotificationsType } from "../notifier/notifier";
+import { ParsingError } from "../notifier/notifier";
 import { Notification } from "./Notification";
 
-export const Notifications = (props: { notifications: NotificationsType }) => {
+export const Notifications = (props: { errors: ParsingError[] }) => {
   return (
     <div class="">
       <div class="space-y-2">
-        <For each={props.notifications.errors}>
+        <For each={props.errors}>
           {(error) => <Notification notification={error} />}
         </For>
-        <For each={props.notifications.warnings}>
+        {/* <For each={props.notifications.warnings}>
           {(warning) => <Notification notification={warning} />}
-        </For>
+        </For> */}
       </div>
     </div>
   );

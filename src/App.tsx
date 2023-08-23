@@ -2,14 +2,17 @@ import { createSignal } from "solid-js";
 import { Note, tabParser } from "./parsers/";
 import TabsCanvas from "./TabsCanvas";
 import { Notifications } from "./components/Notifications";
+import { ParsingError } from "./notifier/notifier";
 
 function App() {
   const [tabsInput, setTabsInput] = createSignal("");
   const [parsedTabs, setParsedTabs] = createSignal<Note[][]>([]);
+  const [parsingErrors, setParsingErrors] = createSignal<ParsingError[][]>([]);
 
   const handleParse = (str: string) => {
     const notation = tabParser(str);
-    setParsedTabs(notation);
+    setParsedTabs(notation.map((v) => v.notes));
+    setParsingErrors(notation.map((v) => v.errors));
   };
 
   return (
@@ -40,9 +43,7 @@ function App() {
           ></TabsCanvas>
         </div>
         <div class="mt-4">
-          <Notifications
-            notifications={{ errors: [], warnings: [] }}
-          ></Notifications>
+          <Notifications errors={parsingErrors().flat()}></Notifications>
         </div>
       </div>
     </div>
