@@ -1,9 +1,9 @@
 import { For, onCleanup, onMount } from "solid-js";
-import { useCanvas } from "./createCanvas";
+import { useCanvas } from "../createCanvas";
 import { Line } from "fabric";
-import { Note as NoteType } from "./parsers";
+import { Note as NoteType } from "../parsers";
 import { Note } from "./Note";
-import config from "../config/tabs-config.json";
+import config from "../../config/tabs-config.json";
 
 interface StaffLineProps {
   width: number;

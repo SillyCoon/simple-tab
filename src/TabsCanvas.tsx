@@ -2,7 +2,7 @@ import { onCleanup, onMount } from "solid-js";
 import { Note } from "./parsers";
 import { Line, Rect } from "fabric";
 import { createCanvas, useCanvas } from "./createCanvas";
-import { Staff } from "./Staff";
+import { Staff } from "./components/Staff";
 
 interface TabsCanvasProps {
   parsedTabs: Note[][];
