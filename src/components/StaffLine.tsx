@@ -51,7 +51,7 @@ export const StaffLine = (props: StaffLineProps) => {
               line={y}
               position={notePosition(
                 note.offset,
-                note.notesBefore,
+                note.order,
                 config.notesOffset,
                 config.initialOffset
               )}

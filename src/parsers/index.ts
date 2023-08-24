@@ -1,5 +1,9 @@
 import { List } from "immutable";
-import { ParsingError } from "../notifier/notifier";
+import {
+  InvalidSymbolError,
+  LongNoteError,
+  ParsingError,
+} from "../notifier/notifier";
 
 export type ParsingResult = {
   notes: Note[];
@@ -34,15 +38,24 @@ const SpecialSymbols = ["-"];
 export interface Note {
   value: number;
   offset: number;
-  notesBefore: number;
+  order: number;
 }
 
 export const tabParser = (tabs: string): ParsingResult[] =>
   tabs
     .trim()
     .split("\n")
-    .map((line) => List(line.split("").filter(isValidSymbol)))
-    .map(parseNotation);
+    .map((line) => List(line.split("")))
+    .map((line) => {
+      const [invalid, valid] = line.partition(isValidSymbol);
+      const notation = parseNotation(valid);
+      const invalidSymbolsErrors = invalid.map(InvalidSymbolError).toArray();
+
+      return {
+        ...notation,
+        errors: [...notation.errors, ...invalidSymbolsErrors],
+      };
+    });
 
 const parseNotation = (notation: List<string>): ParsingResult => {
   const rec = (
@@ -66,7 +79,7 @@ const parseNotation = (notation: List<string>): ParsingResult => {
       notes.push({
         offset: (prevNote?.offset ?? 0) + dashes,
         value: +note,
-        notesBefore: notes.size,
+        order: notes.size,
       }),
       notation.skip(dashes + currentNote.size),
       error ? [...errors, error] : errors
@@ -83,10 +96,7 @@ const isValidSymbol = (s: string) =>
 const cutNote = (note: string): [string] | [string, ParsingError] => {
   const maxNoteSize = 2;
   if (note.length > maxNoteSize) {
-    return [
-      note.slice(0, 2),
-      { message: "Note is too long", value: note, type: "error" },
-    ];
+    return [note.slice(0, 2), LongNoteError(note)];
   }
   return [note];
 };
