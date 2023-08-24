@@ -47,7 +47,9 @@ export const tabParser = (tabs: string): ParsingResult[] =>
     .split("\n")
     .map((line) => List(line.split("")))
     .map((line) => {
-      const [invalid, valid] = line.partition(isValidSymbol);
+      const invalid = line.filterNot((s) => isValidSymbol(s));
+      const valid = line.map((s) => (isValidSymbol(s) ? s : "-"));
+
       const notation = parseNotation(valid);
       const invalidSymbolsErrors = invalid.map(InvalidSymbolError).toArray();
 
