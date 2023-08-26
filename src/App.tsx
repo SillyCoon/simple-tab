@@ -1,8 +1,9 @@
 import { createSignal } from "solid-js";
-import { Note, tabParser } from "./parsers/parser";
+import type { Notation } from "./parsers/Notation";
 import TabsCanvas from "./TabsCanvas";
 import { Notifications } from "./components/Notifications";
 import { ParsingError } from "./notifier/notifier";
+import { tabParser } from "./parsers/parser";
 
 // prettier-ignore
 const example =
@@ -15,13 +16,13 @@ const example =
 
 function App() {
   const [tabsInput, setTabsInput] = createSignal("");
-  const [parsedTabs, setParsedTabs] = createSignal<Note[][]>([]);
+  const [parsedTabs, setParsedTabs] = createSignal<Notation[][]>([]);
   const [parsingErrors, setParsingErrors] = createSignal<ParsingError[][]>([]);
 
   const handleParse = (str: string) => {
-    const notation = tabParser(str);
-    setParsedTabs(notation.map((v) => v.notes));
-    setParsingErrors(notation.map((v) => v.errors));
+    const parseResult = tabParser(str);
+    setParsedTabs(parseResult.map((v) => v.notation));
+    setParsingErrors(parseResult.map((v) => v.errors));
   };
 
   const handleExample = () => {

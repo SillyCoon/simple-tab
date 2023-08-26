@@ -1,7 +1,7 @@
 import { For, onCleanup, onMount } from "solid-js";
 import { useCanvas } from "../createCanvas";
 import { Line } from "fabric";
-import { Note as NoteType } from "../parsers/parser";
+import type { Notation as NotationType } from "../parsers/Notation";
 import { Notation } from "./Notation";
 import config from "../../config/tabs-config.json";
 
@@ -9,7 +9,7 @@ interface StaffLineProps {
   width: number;
   num: number;
   spacing: number;
-  notes: NoteType[];
+  notation: NotationType[];
 }
 
 const notePosition = (
@@ -43,7 +43,7 @@ export const StaffLine = (props: StaffLineProps) => {
 
   return (
     <>
-      <For each={props.notes}>
+      <For each={props.notation}>
         {(note) => {
           return (
             <Notation

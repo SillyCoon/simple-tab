@@ -1,10 +1,10 @@
 import { For, createEffect, onMount } from "solid-js";
 import { StaffLine } from "./StaffLine";
-import { Note } from "../parsers/parser";
+import { Notation } from "../parsers/Notation";
 
 export const Staff = (props: {
   linesNum: number;
-  notation: Note[][];
+  notation: Notation[][];
   width: number;
 }) => {
   createEffect(() => {
@@ -20,7 +20,7 @@ export const Staff = (props: {
           spacing={25}
           width={props.width}
           num={i() + 1}
-          notes={props.notation[i()] ?? []}
+          notation={props.notation[i()] ?? []}
         />
       )}
     </For>

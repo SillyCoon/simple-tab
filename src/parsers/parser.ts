@@ -1,53 +1,14 @@
-import { List } from "immutable";
-import {
-  InvalidSymbolError,
-  LongNoteError,
-  ParsingError,
-} from "../notifier/notifier";
+import { List, is } from "immutable";
+import { InvalidSymbolError, ParsingError } from "../notifier/notifier";
+import { Notation, isNote } from "./Notation";
+import { isSpecialSymbol } from "./SpecialSymbol";
 
 export type ParsingResult = {
-  notes: Note[];
+  notation: Notation[];
   errors: ParsingError[];
 };
 
-const notationTypes = ["note", "hammer"] as const;
-
-export interface Notation {
-  type: (typeof notationTypes)[number];
-  offset: number;
-}
-
-export interface Note extends Notation {
-  type: "note";
-  value: number;
-  order: number;
-}
-
-type Typeless<T extends { type: unknown }> = Omit<T, "type">;
-
-export const Note = (noteWithoutType: Typeless<Note>): Note => ({
-  ...noteWithoutType,
-  type: "note",
-});
-
-export const HammerOn = (hammer: Typeless<HammerOn>): HammerOn => ({
-  ...hammer,
-  type: "hammer",
-});
-
-export interface HammerOn extends Notation {
-  type: "hammer";
-}
-
-export const isNote = (n: Notation): n is Note => n.type === "note";
-export const isHammerOn = (n: Notation): n is HammerOn => n.type === "hammer";
-
-const isSpecialSymbol = (s: string): s is (typeof specialSymbols)[number] =>
-  specialSymbols.includes(s as (typeof specialSymbols)[number]);
-
 const isDash = (s: string): s is "-" => s === "-";
-
-const specialSymbols = [] as const;
 
 const splitStringIntoListLines = (str: string) =>
   str
@@ -71,55 +32,54 @@ export const tabParser = (tabs: string): ParsingResult[] =>
 
 const parseNotation = (notation: List<string>): ParsingResult => {
   const rec = (
-    notes: List<Note>,
-    notation: List<string>,
+    notation: List<Notation>,
+    staff: List<string>,
     errors: ParsingError[],
-  ): Omit<ParsingResult, "notes"> & { notes: List<Note> } => {
-    if (notation.isEmpty()) return { notes, errors };
+  ): Omit<ParsingResult, "notation"> & { notation: List<Notation> } => {
+    if (staff.isEmpty()) return { notation, errors };
 
-    const dashes = countWhileDashes(notation);
-    const currentNote = takeNumber(notation.skip(dashes));
+    const dashes = countWhileDashes(staff);
+    const currentNotation = takeNotation(staff.skip(dashes));
 
-    if (!currentNote.size) return { notes, errors };
+    if (!currentNotation.size) return { notation: notation, errors };
 
-    const prevNote = notes.last();
-    const [note, error] = cutNote(
-      currentNote.reduce<string>((numA, numB) => numA + numB),
-    );
+    const prevNotation = notation.last();
+
+    const [parsedNotation, error] = Notation(currentNotation, {
+      offset: calculateOffset(dashes, prevNotation),
+      order: notation.size,
+    });
 
     return rec(
-      notes.push(
-        Note({
-          offset: (prevNote?.offset ?? 0) + dashes,
-          value: +note,
-          order: notes.size,
-        }),
-      ),
-      notation.skip(dashes + currentNote.size),
+      notation.push(parsedNotation),
+      staff.skip(dashes + currentNotation.size),
       error ? [...errors, error] : errors,
     );
   };
 
   const result = rec(List(), notation, []);
-  return { errors: result.errors, notes: result.notes.toArray() };
+  return { errors: result.errors, notation: result.notation.toArray() };
 };
 
 const isValidSymbol = (s: string) =>
   isSpecialSymbol(s) || isDash(s) || Number.isInteger(+s);
 
-const cutNote = (note: string): [string] | [string, ParsingError] => {
-  const maxNoteSize = 2;
-  if (note.length > maxNoteSize) {
-    return [note.slice(0, 2), LongNoteError(note)];
-  }
-  return [note];
-};
-
 const countWhileDashes = (notation: List<string>): number =>
   notation.takeWhile((n) => n === "-").size;
 
 const takeNumber = (notation: List<string>): List<string> =>
-  notation.takeWhile((n) => n !== "-");
+  notation.takeWhile((n) => Number.isInteger(+n));
 
 const takeSpecialSymbol = (notation: List<string>): List<string> =>
   notation.takeWhile((v) => isSpecialSymbol(v));
+
+const takeNotation = (staff: List<string>) => {
+  const maybeNumber = takeNumber(staff);
+  return maybeNumber.size ? maybeNumber : takeSpecialSymbol(staff);
+};
+
+const calculateOffset = (dashes: number, maybePrev?: Notation): number => {
+  const offset = maybePrev?.offset ?? 0;
+
+  return offset + dashes;
+};

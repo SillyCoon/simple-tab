@@ -2,7 +2,7 @@ import { onCleanup, onMount } from "solid-js";
 import { useCanvas } from "../createCanvas";
 import { Text, Rect, Group } from "fabric";
 import config from "../../config/tabs-config.json";
-import { Notation as NotationType, isNote } from "../parsers/parser";
+import { Notation as NotationType, isNote } from "../parsers/Notation";
 
 const makeBoxedNote = (val: string, fontSize: number) => {
   const note = new Text(val, {

@@ -1,11 +1,11 @@
 import { onCleanup, onMount } from "solid-js";
-import { Note } from "./parsers/parser";
+import type { Notation } from "./parsers/Notation";
 import { Line, Rect } from "fabric";
 import { createCanvas, useCanvas } from "./createCanvas";
 import { Staff } from "./components/Staff";
 
 interface TabsCanvasProps {
-  parsedTabs: Note[][];
+  parsedTabs: Notation[][];
   columnWidth: number;
   lineHeight: number;
   dashWidth: number;
