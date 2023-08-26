@@ -1,10 +1,10 @@
-import { tabParser } from ".";
+import { tabParser } from "./parser";
 import { ParsingError } from "../notifier/notifier";
 
 describe("notation", () => {
   it("notationToNotes", () => {
     const result = tabParser(
-      `${"-".repeat(5)}9-9${"-".repeat(3)}11-9h-k7${"-".repeat(2)}`
+      `${"-".repeat(5)}9-9${"-".repeat(3)}11-9h-k7${"-".repeat(2)}`,
     );
     expect(result[0]).toEqual({
       notes: [

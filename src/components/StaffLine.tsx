@@ -1,7 +1,7 @@
 import { For, onCleanup, onMount } from "solid-js";
 import { useCanvas } from "../createCanvas";
 import { Line } from "fabric";
-import { Note as NoteType } from "../parsers";
+import { Note as NoteType } from "../parsers/parser";
 import { Note } from "./Note";
 import config from "../../config/tabs-config.json";
 
@@ -16,7 +16,7 @@ const notePosition = (
   dashes: number,
   notesBefore: number,
   notesOffset: number,
-  initialOffset: number
+  initialOffset: number,
 ) => {
   return initialOffset + dashes * notesOffset + notesBefore * notesOffset;
 };
@@ -53,7 +53,7 @@ export const StaffLine = (props: StaffLineProps) => {
                 note.offset,
                 note.order,
                 config.notesOffset,
-                config.initialOffset
+                config.initialOffset,
               )}
             ></Note>
           );

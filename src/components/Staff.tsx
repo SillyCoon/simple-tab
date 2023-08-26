@@ -1,6 +1,6 @@
 import { For, createEffect, onMount } from "solid-js";
 import { StaffLine } from "./StaffLine";
-import { Note } from "../parsers";
+import { Note } from "../parsers/parser";
 
 export const Staff = (props: {
   linesNum: number;

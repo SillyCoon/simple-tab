@@ -63,7 +63,7 @@ const parseNotation = (notation: List<string>): ParsingResult => {
   const rec = (
     notes: List<Note>,
     notation: List<string>,
-    errors: ParsingError[]
+    errors: ParsingError[],
   ): Omit<ParsingResult, "notes"> & { notes: List<Note> } => {
     if (notation.isEmpty()) return { notes, errors };
 
@@ -74,7 +74,7 @@ const parseNotation = (notation: List<string>): ParsingResult => {
 
     const prevNote = notes.last();
     const [note, error] = cutNote(
-      currentNote.reduce<string>((numA, numB) => numA + numB)
+      currentNote.reduce<string>((numA, numB) => numA + numB),
     );
 
     return rec(
@@ -84,7 +84,7 @@ const parseNotation = (notation: List<string>): ParsingResult => {
         order: notes.size,
       }),
       notation.skip(dashes + currentNote.size),
-      error ? [...errors, error] : errors
+      error ? [...errors, error] : errors,
     );
   };
 

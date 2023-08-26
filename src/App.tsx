@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { Note, tabParser } from "./parsers/";
+import { Note, tabParser } from "./parsers/parser";
 import TabsCanvas from "./TabsCanvas";
 import { Notifications } from "./components/Notifications";
 import { ParsingError } from "./notifier/notifier";
