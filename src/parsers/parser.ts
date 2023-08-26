@@ -10,36 +10,39 @@ export type ParsingResult = {
   errors: ParsingError[];
 };
 
+const notationTypes = ["note", "hammer"] as const;
+
 export interface Notation {
-  type: "dash" | "note" | "hammer";
-  value?: number;
+  type: (typeof notationTypes)[number];
+  offset: number;
 }
 
-interface NoteNotation extends Notation {
+export interface Note extends Notation {
   type: "note";
   value: number;
+  order: number;
 }
 
-interface DashNotation extends Notation {
-  type: "dash";
-  value: number;
-}
+type Typeless<T extends { type: unknown }> = Omit<T, "type">;
 
-interface HammerOnNotation extends Notation {
+export const Note = (noteWithoutType: Typeless<Note>): Note => ({
+  ...noteWithoutType,
+  type: "note",
+});
+
+export const HammerOn = (hammer: Typeless<HammerOn>): HammerOn => ({
+  ...hammer,
+  type: "hammer",
+});
+
+export interface HammerOn extends Notation {
   type: "hammer";
 }
 
-const isDash = (n: Notation): n is DashNotation => n.type === "dash";
-const isNote = (n: Notation): n is NoteNotation => n.type === "note";
-const isHammerOn = (n: Notation): n is HammerOnNotation => n.type === "hammer";
+export const isNote = (n: Notation): n is Note => n.type === "note";
+export const isHammerOn = (n: Notation): n is HammerOn => n.type === "hammer";
 
 const SpecialSymbols = ["-"];
-
-export interface Note {
-  value: number;
-  offset: number;
-  order: number;
-}
 
 export const tabParser = (tabs: string): ParsingResult[] =>
   tabs
@@ -78,11 +81,13 @@ const parseNotation = (notation: List<string>): ParsingResult => {
     );
 
     return rec(
-      notes.push({
-        offset: (prevNote?.offset ?? 0) + dashes,
-        value: +note,
-        order: notes.size,
-      }),
+      notes.push(
+        Note({
+          offset: (prevNote?.offset ?? 0) + dashes,
+          value: +note,
+          order: notes.size,
+        }),
+      ),
       notation.skip(dashes + currentNote.size),
       error ? [...errors, error] : errors,
     );

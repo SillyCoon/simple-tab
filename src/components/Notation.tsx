@@ -2,6 +2,7 @@ import { onCleanup, onMount } from "solid-js";
 import { useCanvas } from "../createCanvas";
 import { Text, Rect, Group } from "fabric";
 import config from "../../config/tabs-config.json";
+import { Notation as NotationType, isNote } from "../parsers/parser";
 
 const makeBoxedNote = (val: string, fontSize: number) => {
   const note = new Text(val, {
@@ -24,7 +25,7 @@ const makeBoxedNote = (val: string, fontSize: number) => {
 };
 
 export const Notation = (props: {
-  value: number;
+  notation: NotationType;
   line: number;
   position: number;
 }) => {
@@ -32,8 +33,12 @@ export const Notation = (props: {
     const canvas = useCanvas();
     if (!canvas) return;
 
+    if (!isNote(props.notation)) {
+      return;
+    }
+
     const boxedNote = makeBoxedNote(
-      props.value.toString(),
+      props.notation.value.toString(),
       config.fontSize,
     ).set({
       top: props.line,
