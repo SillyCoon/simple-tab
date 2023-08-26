@@ -23,7 +23,7 @@ const makeBoxedNote = (val: string, fontSize: number) => {
   });
 };
 
-export const Note = (props: {
+export const Notation = (props: {
   value: number;
   line: number;
   position: number;
@@ -34,7 +34,7 @@ export const Note = (props: {
 
     const boxedNote = makeBoxedNote(
       props.value.toString(),
-      config.fontSize
+      config.fontSize,
     ).set({
       top: props.line,
       left: props.position,
