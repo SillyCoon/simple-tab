@@ -42,25 +42,32 @@ export interface HammerOn extends Notation {
 export const isNote = (n: Notation): n is Note => n.type === "note";
 export const isHammerOn = (n: Notation): n is HammerOn => n.type === "hammer";
 
-const SpecialSymbols = ["-"];
+const isSpecialSymbol = (s: string): s is (typeof specialSymbols)[number] =>
+  specialSymbols.includes(s as (typeof specialSymbols)[number]);
 
-export const tabParser = (tabs: string): ParsingResult[] =>
-  tabs
+const isDash = (s: string): s is "-" => s === "-";
+
+const specialSymbols = [] as const;
+
+const splitStringIntoListLines = (str: string) =>
+  str
     .trim()
     .split("\n")
-    .map((line) => List(line.split("")))
-    .map((line) => {
-      const invalid = line.filterNot((s) => isValidSymbol(s));
-      const valid = line.map((s) => (isValidSymbol(s) ? s : "-"));
+    .map((line) => List(line.split("")));
 
-      const notation = parseNotation(valid);
-      const invalidSymbolsErrors = invalid.map(InvalidSymbolError).toArray();
+export const tabParser = (tabs: string): ParsingResult[] =>
+  splitStringIntoListLines(tabs).map((line) => {
+    const invalid = line.filterNot((s) => isValidSymbol(s));
+    const valid = line.map((s) => (isValidSymbol(s) ? s : "-"));
 
-      return {
-        ...notation,
-        errors: [...notation.errors, ...invalidSymbolsErrors],
-      };
-    });
+    const notation = parseNotation(valid);
+    const invalidSymbolsErrors = invalid.map(InvalidSymbolError).toArray();
+
+    return {
+      ...notation,
+      errors: [...notation.errors, ...invalidSymbolsErrors],
+    };
+  });
 
 const parseNotation = (notation: List<string>): ParsingResult => {
   const rec = (
@@ -71,7 +78,7 @@ const parseNotation = (notation: List<string>): ParsingResult => {
     if (notation.isEmpty()) return { notes, errors };
 
     const dashes = countWhileDashes(notation);
-    const currentNote = takeNote(notation.skip(dashes));
+    const currentNote = takeNumber(notation.skip(dashes));
 
     if (!currentNote.size) return { notes, errors };
 
@@ -98,7 +105,7 @@ const parseNotation = (notation: List<string>): ParsingResult => {
 };
 
 const isValidSymbol = (s: string) =>
-  SpecialSymbols.includes(s) || Number.isInteger(+s);
+  isSpecialSymbol(s) || isDash(s) || Number.isInteger(+s);
 
 const cutNote = (note: string): [string] | [string, ParsingError] => {
   const maxNoteSize = 2;
@@ -111,5 +118,8 @@ const cutNote = (note: string): [string] | [string, ParsingError] => {
 const countWhileDashes = (notation: List<string>): number =>
   notation.takeWhile((n) => n === "-").size;
 
-const takeNote = (notation: List<string>): List<string> =>
+const takeNumber = (notation: List<string>): List<string> =>
   notation.takeWhile((n) => n !== "-");
+
+const takeSpecialSymbol = (notation: List<string>): List<string> =>
+  notation.takeWhile((v) => isSpecialSymbol(v));
