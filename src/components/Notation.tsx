@@ -1,10 +1,10 @@
 import { onCleanup, onMount } from "solid-js";
 import { useCanvas } from "../createCanvas";
-import { Text, Rect, Group } from "fabric";
+import { Text, Rect, Group, Path } from "fabric";
 import config from "../../config/tabs-config.json";
 import { Notation as NotationType, isNote } from "../parsers/Notation";
 
-const makeBoxedNote = (val: string, fontSize: number) => {
+const BoxedNote = (val: string, fontSize: number) => {
   const note = new Text(val, {
     originY: "center",
     originX: "center",
@@ -33,23 +33,35 @@ export const Notation = (props: {
     const canvas = useCanvas();
     if (!canvas) return;
 
-    if (!isNote(props.notation)) {
-      return;
+    if (isNote(props.notation)) {
+      const boxedNote = BoxedNote(
+        props.notation.value.toString(),
+        config.fontSize,
+      ).set({
+        top: props.line,
+        left: props.position,
+      });
+
+      canvas.add(boxedNote);
+
+      onCleanup(() => {
+        canvas.remove(boxedNote);
+      });
+    } else {
+      const curve = new Path(`M0 0 A${30} ${props.line} 0 0 1 ${30} 0`, {
+        left: props.position - 10,
+        top: props.line - 20,
+        stroke: "black",
+        fill: "",
+        strokeWidth: 1,
+      });
+
+      canvas.add(curve);
+
+      onCleanup(() => {
+        canvas.remove(curve);
+      });
     }
-
-    const boxedNote = makeBoxedNote(
-      props.notation.value.toString(),
-      config.fontSize,
-    ).set({
-      top: props.line,
-      left: props.position,
-    });
-
-    canvas.add(boxedNote);
-
-    onCleanup(() => {
-      canvas.remove(boxedNote);
-    });
   });
 
   return <></>;
