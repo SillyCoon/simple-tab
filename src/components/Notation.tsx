@@ -49,8 +49,8 @@ export const Notation = (props: {
       });
     } else {
       const curve = new Path(`M0 0 A${30} ${props.line} 0 0 1 ${30} 0`, {
-        left: props.position - 10,
-        top: props.line - 20,
+        left: props.position - config.notesOffset / 2,
+        top: props.line - config.notationLineOffset,
         stroke: "black",
         fill: "",
         strokeWidth: 1,
